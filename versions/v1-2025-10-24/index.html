@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Living Reviews · Climate Disclosure</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+/* VOICE: a newspaper research desk's evidence ledger — calm, exact, every claim traceable.
+   IDEA: an annotated evidence map, like a graphics-desk matrix with footnotes you can open.
+   PICTURE: the outcome × factor evidence matrix, dots sized by records, coloured by evidence type.
+   COLOUR and TYPE: pale pink ground, ink, teal for empirical evidence, claret for expectation; Libre Franklin.
+   LAYOUT: review switcher as three ledger cards, then matrix first, then findings, gaps, records, audit trail. */
+:root{color-scheme:light dark;
+--bg:light-dark(#ffe3dc,#1c1512);--paper:light-dark(#fff4f0,#261c18);--ink:light-dark(#1a1817,#f3e9e4);
+--mute:light-dark(#5d5552,#b7aaa4);--line:light-dark(#e9c5bb,#45362f);
+--teal:light-dark(#0d7680,#4fb8c1);--teal2:light-dark(#79b8bd,#2d7f86);--claret:light-dark(#990f3d,#e0567f);--grey:light-dark(#9a908c,#80756f)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 "Libre Franklin",system-ui,sans-serif;overflow-x:clip}
+.band{padding:clamp(20px,3.2vw,48px) max(5vw,16px);max-width:1340px;margin:0 auto}
+h1,h2,h3{font-weight:800;line-height:1.08;text-wrap:balance;margin:0 0 .4em}
+h1{font-size:clamp(30px,4.2vw,50px)}h2{font-size:clamp(22px,2.6vw,30px);margin-top:.2em}h3{font-size:18px}
+p{max-width:72ch}.mute{color:var(--mute)}.small{font-size:13.5px}
+a{color:var(--teal)}button{font:inherit;color:inherit}
+header .note{font-size:14px;color:var(--mute);max-width:80ch}
+.cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:18px}
+.card{all:unset;box-sizing:border-box;cursor:pointer;background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:16px 18px;display:flex;flex-direction:column;gap:8px}
+.card:focus-visible{outline:3px solid var(--teal);outline-offset:2px}
+.card[aria-selected=true]{border-color:var(--ink);box-shadow:inset 0 -5px 0 var(--ink)}
+.card b{font-size:18px;line-height:1.2}.card .k{font-size:13.5px;color:var(--mute)}
+.nums{display:flex;flex-wrap:wrap;gap:4px 16px;font-size:14px}.nums span b{font-size:20px;font-weight:800;margin-right:4px}
+nav.scroll{display:flex;gap:6px;overflow-x:auto;padding:10px 0;border-bottom:1px solid var(--line);position:static}
+nav.scroll a{flex:none;text-decoration:none;color:var(--ink);font-size:14px;padding:8px 12px;border-radius:20px;border:1px solid var(--line);background:var(--paper)}
+@media(min-width:900px){nav.scroll{position:sticky;top:0;background:var(--bg);z-index:5}}
+section{padding-top:28px}
+.qs{margin:.3em 0 0;padding-left:1.2em}.qs li{margin:.15em 0}
+.mapwrap{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:22px;align-items:start}
+.matrix{overflow-x:auto;background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:12px}
+.matrix table{border-collapse:collapse;font-size:13.5px}
+.matrix th{font-weight:600;text-align:left;vertical-align:bottom;padding:4px 6px}
+.matrix thead th{writing-mode:vertical-rl;transform:rotate(180deg);height:235px;white-space:nowrap;font-weight:600}
+.matrix tbody th{white-space:nowrap;max-width:240px;overflow:hidden;text-overflow:ellipsis}
+.matrix td{width:44px;height:40px;text-align:center;border:1px solid var(--line);padding:0}
+.cell{all:unset;cursor:pointer;display:grid;place-items:center;width:100%;height:40px}
+.cell:focus-visible{outline:2px solid var(--teal)}
+.dot{border-radius:50%;display:grid;place-items:center;color:#fff;font-size:11px;font-weight:600}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13.5px;margin-top:10px}
+.sw{display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:5px;vertical-align:-1px}
+.side{background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:14px 16px;font-size:14.5px}
+.bar{display:flex;height:14px;border-radius:3px;overflow:hidden;margin:6px 0 4px}
+.bar i{display:block;height:100%}
+.st{background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:14px 16px;margin:10px 0}
+.st p{margin:.3em 0}
+.chip{display:inline-block;font-size:12.5px;font-weight:600;padding:2px 9px;border-radius:12px;border:1.5px solid currentColor;white-space:nowrap;margin-right:6px}
+.c-High{background:var(--teal);color:#fff;border-color:var(--teal)}.c-Moderate{color:var(--teal)}
+.c-Low{color:var(--mute)}.c-Expected{color:var(--claret)}.c-Inconsistent{background:var(--claret);color:#fff;border-color:var(--claret)}
+.rid{all:unset;cursor:pointer;font-size:12.5px;font-weight:600;color:var(--teal);text-decoration:underline;margin-right:6px}
+.rid:focus-visible{outline:2px solid var(--teal)}
+.gaps{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px}
+.gap{background:var(--paper);border:1px solid var(--line);border-left:4px solid var(--claret);border-radius:6px;padding:12px 14px;font-size:14.5px}
+.filters{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
+select,input[type=search]{font:inherit;font-size:16px;min-height:44px;padding:6px 10px;border:1px solid var(--line);border-radius:6px;background:var(--paper);color:var(--ink)}
+select:focus-visible,input:focus-visible,.btn:focus-visible{outline:3px solid var(--teal);outline-offset:1px}
+.btn{min-height:44px;padding:6px 14px;border:1px solid var(--ink);border-radius:6px;background:transparent;cursor:pointer}
+table.t{width:100%;border-collapse:collapse;font-size:14px;background:var(--paper)}
+table.t th,table.t td{text-align:left;vertical-align:top;padding:8px 10px;border-bottom:1px solid var(--line)}
+table.t th{font-weight:600;background:var(--bg)}
+.rec{background:var(--paper);border:1px solid var(--line);border-radius:6px;margin:8px 0}
+.rec summary{cursor:pointer;padding:10px 14px;list-style:none;display:flex;flex-wrap:wrap;gap:6px 10px;align-items:baseline}
+.rec summary::-webkit-details-marker{display:none}
+.rec[open]{box-shadow:0 0 0 2px var(--teal)}
+.rec .body{padding:0 14px 12px;font-size:14.5px}
+.rec dl{display:grid;grid-template-columns:150px minmax(0,1fr);gap:4px 12px;margin:6px 0}
+.rec dt{color:var(--mute)}.rec dd{margin:0}
+blockquote{margin:6px 0;padding:6px 12px;border-left:3px solid var(--grey);font-style:italic}
+.tag{font-size:12px;padding:1px 7px;border-radius:10px;background:var(--bg);border:1px solid var(--line);white-space:nowrap}
+details.block{background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:10px 14px;margin:10px 0}
+details.block>summary{cursor:pointer;font-weight:600}
+.md{font-size:14.5px}.md table{border-collapse:collapse;font-size:13.5px;display:block;overflow-x:auto}.md th,.md td{border:1px solid var(--line);padding:4px 8px;text-align:left;vertical-align:top}
+.md pre{background:var(--bg);padding:10px;border-radius:4px;overflow-x:auto;font-size:13px}.md blockquote{font-style:normal}
+footer{font-size:13.5px;color:var(--mute)}
+.empty{color:var(--mute);font-style:italic}
+pre,.scroll{overflow-x:auto}.scroll a{flex:none}code{overflow-wrap:anywhere}html{scroll-padding-top:72px}
+@media(max-width:900px){.mapwrap{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:700px){.cards{grid-template-columns:minmax(0,1fr)}.rec dl{grid-template-columns:minmax(0,1fr)}.rec dt{font-weight:600}}
+@media(max-width:600px){table{font-size:13px}.stack thead{display:none}.stack tr{display:grid;padding-block:10px}.stack td{display:flow-root;border:0;padding:3px 0;padding-inline-start:8em;text-align:start}.stack td::before{content:attr(data-l);float:inline-start;width:7.5em;margin-inline-start:-8em;white-space:normal;color:var(--mute)}.stack td:empty{display:none}}
+@media(prefers-reduced-motion:no-preference){.rec[open] .body{animation:fade .25s ease}@keyframes fade{from{opacity:0;transform:translateY(-3px)}to{opacity:1}}}
+</style>
+<script>new MutationObserver(()=>{for(const c of document.querySelectorAll('.stack td:not([data-l])')){let i=0,p=c;while(p=p.previousElementSibling)i+=p.colSpan;c.dataset.l=c.closest('table').rows[0].cells[i]?.textContent||''}}).observe(document,{childList:true,subtree:true})</script>
+</head>
+<body>
+<header class="band">
+  <h1>Living reviews of climate-related disclosure policy</h1>
+  <p class="note">Proof of concept. Three self-contained living reviews, each run once (pilot release, 24 Nov 2026) by AI agents following a written protocol, starting from the IFRS Fellows concept note (Bolton et al., 2025). Records are agent-coded and <b>not yet human-checked</b>; every finding links to the records and source passages it rests on.</p>
+  <div class="cards" id="cards" role="tablist" aria-label="Reviews"></div>
+</header>
+<main class="band" id="main" style="padding-top:0"><p class="empty">Loading data…</p></main>
+<footer class="band">
+  <details class="block"><summary>Protocol template (shared starting point, v0.2)</summary><div class="md" id="tpl"></div></details>
+  <p>Built from the pilot data files. Passages are short verbatim excerpts with locators; follow the reference links for the full sources.</p>
+</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
+<script>
+{
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const SLUG={A:'effectiveness',B:'emissions',C:'enforcement'};
+const ETC={CE:'var(--teal)',AS:'var(--teal2)',DE:'var(--grey)',TH:'var(--grey)',EX:'var(--claret)',ABS:'transparent'};
+const ETN={CE:'Causal estimate',AS:'Association',DE:'Description',TH:'Theory',EX:'Expectation',ABS:'Evidence lacking'};
+const ETRANK=['CE','AS','DE','TH','EX','ABS'];
+let D=null,cur=null,filt={el:'',el2:'',et:'',ta:'',q:''};
+const cards=document.getElementById('cards'),main=document.getElementById('main');
+
+function counts(r){const inc=r.references.filter(x=>x.decision==='included').length;
+  return {inc,scr:r.references.length,rec:r.records.length,st:(r.synthesis?.statements||[]).length,gap:(r.synthesis?.gaps||[]).length}}
+
+function renderCards(){cards.innerHTML=D.reviews.map(r=>{const c=counts(r);return `<button class="card" role="tab" aria-selected="${r.review.key===cur?.review.key}" data-k="${esc(r.review.key)}">
+  <b>${esc(r.review.title)}</b><span class="k">${esc(r.review.focus)}</span>
+  <span class="nums"><span><b>${c.inc}</b>references</span><span><b>${c.rec}</b>records</span><span><b>${c.st}</b>findings</span><span><b>${c.gap}</b>gaps</span></span></button>`}).join('');
+  cards.querySelectorAll('.card').forEach(b=>b.onclick=()=>{location.hash=SLUG[b.dataset.k]})}
+
+function reg(r){const m={};for(const e of r.registry)m[e.id]=e;return m}
+function elName(R,id){return R[id]?R[id].name:id}
+function recsFor(r,a,b){return r.records.filter(x=>{const ids=(x.elements||[]).map(e=>e.id);return(!a||ids.includes(a))&&(!b||ids.includes(b))})}
+function conf(c){const k=String(c||'').split(' ')[0];return `<span class="chip c-${esc(k)}">${esc(c||'—')}</span>`}
+function rids(list){return (list||[]).map(id=>`<button class="rid" data-rec="${esc(id)}">${esc(id)}</button>`).join('')}
+
+function matrix(r,R){
+  const outs=r.registry.filter(e=>e.type==='outcome'&&e.status!=='retired'),facs=r.registry.filter(e=>e.type==='factor'&&e.status!=='retired');
+  const cell=(o,f)=>{const rs=recsFor(r,o.id,f.id).filter(x=>(x.elements||[]).some(e=>e.id===o.id&&e.role==='outcome')&&(x.elements||[]).some(e=>e.id===f.id&&e.role==='factor'));
+    if(!rs.length)return '<td></td>';
+    const best=ETRANK.find(t=>rs.some(x=>x.evidence_type===t))||'DE';const sz=Math.min(34,14+rs.length*4);
+    const style=best==='ABS'?'border:2px dashed var(--claret);color:var(--claret)':`background:${ETC[best]}`;
+    return `<td><button class="cell" data-o="${esc(o.id)}" data-f="${esc(f.id)}" aria-label="${esc(o.name)} × ${esc(f.name)}: ${rs.length} records"><span class="dot" style="width:${sz}px;height:${sz}px;${style}">${rs.length}</span></button></td>`};
+  return `<div class="matrix"><table><thead><tr><th></th>${facs.map(f=>`<th title="${esc(f.definition)}">${esc(f.id)} ${esc(f.name)}</th>`).join('')}</tr></thead>
+  <tbody>${outs.map(o=>`<tr><th title="${esc(o.definition)}">${esc(o.id)} ${esc(o.name)}</th>${facs.map(f=>cell(o,f)).join('')}</tr>`).join('')}</tbody></table>
+  <div class="legend">${ETRANK.map(t=>`<span><i class="sw" style="${t==='ABS'?'border:2px dashed var(--claret)':'background:'+ETC[t]}"></i>${ETN[t]}</span>`).join('')}<span class="mute">Colour = strongest evidence type in cell; number = records. Select a cell to filter records.</span></div></div>`}
+
+function evMix(r){const n=r.records.length||1;const c={};for(const x of r.records)c[x.evidence_type]=(c[x.evidence_type]||0)+1;
+  const ta={};for(const x of r.records)ta[x.text_accessed]=(ta[x.text_accessed]||0)+1;
+  return `<div class="side"><h3>Evidence base</h3>
+  <div class="bar" role="img" aria-label="evidence type mix">${ETRANK.filter(t=>c[t]).map(t=>`<i style="width:${c[t]/n*100}%;background:${t==='ABS'?'var(--line)':ETC[t]}" title="${ETN[t]}: ${c[t]}"></i>`).join('')}</div>
+  <div class="small">${ETRANK.filter(t=>c[t]).map(t=>`${ETN[t]} ${c[t]}`).join(' · ')}</div>
+  <p class="small" style="margin-top:10px"><b>Text coded from:</b> ${Object.entries(ta).map(([k,v])=>`${esc(k.replace('_',' '))} ${v}`).join(' · ')}</p>
+  <p class="small"><b>Protocol</b> v${esc(r.review.protocol_version)} · run ${esc(r.review.run_date)}</p>
+  <h3 style="margin-top:12px">Review questions</h3><ol class="qs small">${(r.review.questions||[]).map(q=>`<li><b>${esc(q.id)}</b> ${esc(q.text)}</li>`).join('')}</ol></div>`}
+
+function statements(r){const S=r.synthesis?.statements||[];const qs=r.review.questions||[];
+  return qs.map(q=>{const ss=S.filter(s=>s.question===q.id);return `<h3 style="margin-top:18px">${esc(q.id)} · ${esc(q.text)}</h3>`+
+   (ss.length?ss.map(s=>`<div class="st"><p>${conf(s.confidence)}<b>${esc(s.id)}</b> ${esc(s.text)}</p>
+   ${s.conditions?`<p class="small"><b>Conditions:</b> ${esc(s.conditions)}</p>`:''}
+   ${s.confidence_reason?`<p class="small mute">Why this confidence: ${esc(s.confidence_reason)}</p>`:''}
+   <p class="small">Rests on: ${rids(s.records)}</p></div>`).join(''):'<p class="empty">No statement for this question.</p>')}).join('')}
+
+function gaps(r,R){const G=[...(r.synthesis?.gaps||[])].sort((a,b)=>(a.priority??99)-(b.priority??99));
+  return G.length?`<div class="gaps">${G.map(g=>`<div class="gap"><p style="margin:0 0 4px"><b>${esc(g.id)}</b> <span class="tag">type ${esc(g.type)}</span> <span class="tag">priority ${esc(g.priority)}</span></p>
+  <p style="margin:0">${esc(g.text)}</p>${(g.elements||[]).length?`<p class="small mute" style="margin:6px 0 0">${g.elements.map(e=>esc(e+' '+elName(R,e))).join(' · ')}</p>`:''}
+  ${g.priority_reason?`<p class="small" style="margin:4px 0 0">${esc(g.priority_reason)}</p>`:''}${(g.records||[]).length?`<p class="small" style="margin:4px 0 0">${rids(g.records)}</p>`:''}</div>`).join('')}</div>`:'<p class="empty">No gaps recorded.</p>'}
+
+function recCard(x,R,refs){const ref=refs[x.reference_id];const ex=x.extra||{};
+  return `<details class="rec" id="rec-${esc(x.record_id)}"><summary><b>${esc(x.record_id)}</b>
+  <span class="tag" style="border-color:${ETC[x.evidence_type]||'var(--line)'}">${esc(ETN[x.evidence_type]||x.evidence_type)}</span>
+  <span>${esc(x.relationship)}</span></summary><div class="body">
+  ${x.passage?`<blockquote>“${esc(x.passage)}” <span class="mute small">(${esc(x.locator)})</span></blockquote>`:''}
+  <dl><dt>Reference</dt><dd>${esc(x.reference_id)} · ${ref?esc(ref.citation):''} ${ref?.url?`<a href="${esc(ref.url)}" rel="noopener">link</a>`:''}</dd>
+  ${x.primary_source?`<dt>Primary source</dt><dd>${esc(x.primary_source)}</dd>`:''}
+  <dt>Elements</dt><dd>${(x.elements||[]).map(e=>`<span class="tag">${esc(e.role)}: ${esc(e.id)} ${esc(elName(R,e.id))}</span>`).join(' ')}</dd>
+  <dt>Direction</dt><dd>${esc(x.direction)}</dd><dt>Context</dt><dd>${esc(x.context)}</dd><dt>Instrument</dt><dd>${esc(x.instrument)}</dd>
+  <dt>Appraisal</dt><dd>strength ${esc(x.strength)} · relevance ${esc(x.relevance)} · text ${esc(x.text_accessed)}</dd>
+  ${Object.entries(ex).filter(([k,v])=>v!==null&&v!=='').map(([k,v])=>`<dt>${esc(k.replace(/_/g,' '))}</dt><dd>${esc(typeof v==='object'?JSON.stringify(v):v)}</dd>`).join('')}
+  ${(x.flags||[]).length?`<dt>Flags</dt><dd>${x.flags.map(f=>`<span class="tag">${esc(f)}</span>`).join(' ')}</dd>`:''}
+  ${x.same_as?`<dt>Same as</dt><dd>${esc(x.same_as)}</dd>`:''}${x.superseded_by?`<dt>Superseded by</dt><dd>${esc(x.superseded_by)}</dd>`:''}
+  <dt>Coded / checked</dt><dd>${esc(x.coded_by)} / ${esc(x.checked_by||'not yet')}</dd></dl></div></details>`}
+
+function recordsList(r,R){const refs={};for(const f of r.references)refs[f.id]=f;
+  let rs=r.records.filter(x=>{const ids=(x.elements||[]).map(e=>e.id);
+    if(filt.el&&!ids.includes(filt.el))return false;if(filt.el2&&!ids.includes(filt.el2))return false;
+    if(filt.et&&x.evidence_type!==filt.et)return false;if(filt.ta&&x.text_accessed!==filt.ta)return false;
+    if(filt.q){const h=(x.relationship+' '+x.passage+' '+x.context+' '+x.instrument).toLowerCase();if(!h.includes(filt.q.toLowerCase()))return false}return true});
+  return `<p class="small mute">${rs.length} of ${r.records.length} records${filt.el||filt.el2?` · element filter: ${esc([filt.el,filt.el2].filter(Boolean).map(e=>e+' '+elName(R,e)).join(' + '))}`:''}</p>`+
+   (rs.length?rs.map(x=>recCard(x,R,refs)).join(''):'<p class="empty">No records match.</p>')}
+
+function filters(r){const opt=(v,l,s)=>`<option value="${esc(v)}"${s===v?' selected':''}>${esc(l)}</option>`;
+  return `<div class="filters"><label class="small">Element<br><select id="fEl">${opt('','Any element',filt.el)}${r.registry.map(e=>opt(e.id,e.id+' '+e.name,filt.el)).join('')}</select></label>
+  <label class="small">Evidence type<br><select id="fEt">${opt('','Any',filt.et)}${ETRANK.map(t=>opt(t,ETN[t],filt.et)).join('')}</select></label>
+  <label class="small">Text coded from<br><select id="fTa">${opt('','Any',filt.ta)}${['full_text','abstract','second_hand'].map(t=>opt(t,t.replace('_',' '),filt.ta)).join('')}</select></label>
+  <label class="small">Search<br><input type="search" id="fQ" value="${esc(filt.q)}" placeholder="e.g. liquidity"></label>
+  <label class="small"><br><button class="btn" id="fClear">Clear filters</button></label></div><div id="reclist"></div>`}
+
+function refsTable(r){return `<div class="scroll"><table class="t stack"><thead><tr><th>ID</th><th>Reference</th><th>Route</th><th>Decision</th><th>Reason</th><th>Text accessed</th></tr></thead><tbody>
+  ${r.references.map(f=>`<tr><td>${esc(f.id)}</td><td>${esc(f.citation)} ${f.url?`<a href="${esc(f.url)}" rel="noopener">link</a>`:''}</td><td>${esc(f.route)}${f.found_via?` (${esc(f.found_via)})`:''}</td><td>${esc(f.decision)}</td><td>${esc(f.reason)}</td><td>${esc(f.text_accessed)}</td></tr>`).join('')}</tbody></table></div>`}
+
+function regTable(r){const hasI=r.registry.some(e=>e.intended_by);return `<div class="scroll"><table class="t stack"><thead><tr><th>ID</th><th>Type</th><th>Name</th><th>Definition</th><th>Broader</th>${hasI?'<th>Intended by</th>':''}<th>Records</th><th>Added</th></tr></thead><tbody>
+  ${r.registry.map(e=>`<tr><td>${esc(e.id)}</td><td>${esc(e.type)}</td><td>${esc(e.name)}</td><td>${esc(e.definition)}</td><td>${esc(e.broader||'')}</td>${hasI?`<td>${esc(e.intended_by||'')}</td>`:''}<td><button class="rid" data-el="${esc(e.id)}">${recsFor(r,e.id).length}</button></td><td>${esc(e.added_in)}</td></tr>`).join('')}</tbody></table></div>`}
+
+function simpleTable(rows,cols){if(!rows||!rows.length)return '<p class="empty">None.</p>';
+  return `<div class="scroll"><table class="t stack"><thead><tr>${cols.map(c=>`<th>${esc(c)}</th>`).join('')}</tr></thead><tbody>${rows.map(x=>`<tr>${cols.map(c=>`<td>${esc(typeof x[c]==='object'&&x[c]!==null?JSON.stringify(x[c]):x[c])}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`}
+
+function audit(r){return `<details class="block" open><summary>Run notes and deviations from protocol</summary><p>${esc(r.run_notes)}</p><ul>${(r.deviations||[]).map(d=>`<li>${esc(d)}</li>`).join('')}</ul></details>
+  <details class="block"><summary>Search log (${(r.search_log||[]).length})</summary>${simpleTable(r.search_log,['id','date','source','query_or_seed','results','new','notes'])}</details>
+  <details class="block"><summary>Decision log (${(r.decision_log||[]).length})</summary>${simpleTable(r.decision_log,['date','item','case','decision','reason','by'])}</details>
+  <details class="block"><summary>Change log: proposed protocol changes (${(r.change_log||[]).length})</summary>${simpleTable(r.change_log,['id','item','change','reason','status'])}</details>
+  <details class="block"><summary>Full protocol (v${esc(r.review.protocol_version)})</summary><div class="md">${window.marked?marked.parse(r.protocol_md||''):'<pre>'+esc(r.protocol_md)+'</pre>'}</div></details>`}
+
+function renderReview(){const r=cur,R=reg(r);
+  main.innerHTML=`<nav class="scroll" aria-label="Sections"><a href="#${SLUG[r.review.key]}" data-j="s-map">Evidence map</a><a href="#${SLUG[r.review.key]}" data-j="s-find">Findings</a><a href="#${SLUG[r.review.key]}" data-j="s-gaps">Gaps</a><a href="#${SLUG[r.review.key]}" data-j="s-rec">Records</a><a href="#${SLUG[r.review.key]}" data-j="s-ref">References</a><a href="#${SLUG[r.review.key]}" data-j="s-reg">Elements</a><a href="#${SLUG[r.review.key]}" data-j="s-aud">Audit trail</a></nav>
+  <section id="s-map"><h2>${esc(r.review.title)}</h2><p class="mute">${esc(r.review.focus)}</p>
+   <div class="mapwrap">${matrix(r,R)}${evMix(r)}</div></section>
+  <section id="s-find"><h2>What the evidence says</h2><p class="small mute">Synthesis statements by review question. Confidence follows the protocol's S4.3 rules; select a record ID to open it.</p>${statements(r)}</section>
+  <section id="s-gaps"><h2>Gaps</h2>${gaps(r,R)}</section>
+  <section id="s-rec"><h2>Records</h2>${filters(r)}</section>
+  <section id="s-ref"><h2>References</h2>${refsTable(r)}</section>
+  <section id="s-reg"><h2>Elements: outcomes, mechanisms, factors</h2>${regTable(r)}</section>
+  <section id="s-aud"><h2>Audit trail</h2>${audit(r)}</section>`;
+  drawRecs();bind();}
+
+function drawRecs(){document.getElementById('reclist').innerHTML=recordsList(cur,reg(cur))}
+function openRec(id){filt={el:'',el2:'',et:'',ta:'',q:''};syncFilters();drawRecs();const d=document.getElementById('rec-'+id);if(d){d.open=true;d.scrollIntoView({behavior:'smooth',block:'center'})}}
+function syncFilters(){const s=(i,v)=>{const e=document.getElementById(i);if(e)e.value=v};s('fEl',filt.el);s('fEt',filt.et);s('fTa',filt.ta);s('fQ',filt.q)}
+function bind(){
+  main.querySelectorAll('nav a').forEach(a=>a.onclick=e=>{e.preventDefault();document.getElementById(a.dataset.j).scrollIntoView({behavior:'smooth'})});
+  main.addEventListener('click',e=>{const b=e.target.closest('[data-rec]');if(b){e.preventDefault();openRec(b.dataset.rec);return}
+    const c=e.target.closest('.cell');if(c){filt={el:c.dataset.o,el2:c.dataset.f,et:'',ta:'',q:''};syncFilters();drawRecs();document.getElementById('s-rec').scrollIntoView({behavior:'smooth'});return}
+    const el=e.target.closest('[data-el]');if(el){filt={el:el.dataset.el,el2:'',et:'',ta:'',q:''};syncFilters();drawRecs();document.getElementById('s-rec').scrollIntoView({behavior:'smooth'})}});
+  document.getElementById('fEl').onchange=e=>{filt.el=e.target.value;filt.el2='';drawRecs()};
+  document.getElementById('fEt').onchange=e=>{filt.et=e.target.value;drawRecs()};
+  document.getElementById('fTa').onchange=e=>{filt.ta=e.target.value;drawRecs()};
+  document.getElementById('fQ').oninput=e=>{filt.q=e.target.value;drawRecs()};
+  document.getElementById('fClear').onclick=()=>{filt={el:'',el2:'',et:'',ta:'',q:''};syncFilters();drawRecs()};}
+
+function route(){const h=location.hash.slice(1);const key=Object.keys(SLUG).find(k=>SLUG[k]===h)||'A';
+  const r=D.reviews.find(x=>x.review.key===key)||D.reviews[0];if(r!==cur){cur=r;filt={el:'',el2:'',et:'',ta:'',q:''};renderCards();renderReview()}}
+
+fetch('data.json').then(r=>r.json()).then(d=>{D=d;
+  document.getElementById('tpl').innerHTML=window.marked?marked.parse(d.template_md||''):'<pre>'+esc(d.template_md)+'</pre>';
+  route();addEventListener('hashchange',route)}).catch(err=>{main.innerHTML='<p class="empty">Could not load data.json.</p>'});
+}
+</script>
+</body>
+</html>

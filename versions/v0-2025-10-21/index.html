@@ -1,0 +1,1527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Climate Stress Testing Research Interface</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f8f9fa;
+            color: #2c3e50;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .container {
+            display: flex;
+            height: 100vh;
+            gap: 1px;
+        }
+
+        .pdf-panel {
+            flex: 1;
+            background: white;
+            border-right: 1px solid #dee2e6;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .pdf-header {
+            background: #f8f9fa;
+            padding: 12px 16px;
+            border-bottom: 1px solid #dee2e6;
+            font-weight: 600;
+            font-size: 14px;
+            color: #007F7F;
+        }
+
+        .pdf-viewer {
+            flex: 1;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: auto;
+        }
+
+        .pdf-content {
+            width: 100%;
+            height: 100%;
+            padding: 40px;
+            background: white;
+            font-size: 12px;
+            line-height: 1.6;
+            overflow-y: auto;
+        }
+        .pdf-para {
+            padding-left: 8px;
+        }
+        .pdf-para:hover {
+            border-left: 2px solid #007F7F;
+            padding-left: 6px;
+        }
+
+        .right-panel {
+            flex: 1;
+            background: white;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .tab-header {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .tab-button {
+            padding: 12px 16px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            color: #6c757d;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .tab-button:hover {
+            background: #e9ecef;
+            color: #495057;
+        }
+
+        .tab-button.active {
+            color: #007F7F;
+            border-bottom-color: #007F7F;
+            background: white;
+        }
+
+        .tab-content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .tab-pane {
+            display: none;
+        }
+
+        .tab-pane.active {
+            display: block;
+        }
+
+        /* References Table */
+        .references-table {
+            width: 80%;
+            margin-left: auto;
+            margin-right: auto;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        .references-table th,
+        .references-table td {
+            padding: 12px 8px;
+            text-align: left;
+            border-bottom: 1px solid #dee2e6;
+            vertical-align: top;
+        }
+
+        .references-table th {
+            background: #f8f9fa;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+        }
+
+        .references-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        /* Knowledge Base */
+        .kb-section {
+            margin-bottom: 24px;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .kb-header {
+            background: #f8f9fa;
+            padding: 12px 16px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .kb-content {
+            padding: 16px;
+            background: white;
+        }
+
+        .kb-content.collapsed {
+            display: none;
+        }
+
+        .plot-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+        }
+
+        .plot-item {
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            overflow: hidden;
+            background: white;
+        }
+
+        .plot-placeholder {
+            height: 150px;
+            background: linear-gradient(45deg, #f8f9fa, #e9ecef);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #6c757d;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .plot-caption {
+            padding: 8px 12px;
+            font-size: 12px;
+            background: #f8f9fa;
+            border-top: 1px solid #dee2e6;
+            text-align: left;
+        }
+
+        .data-table {
+            font-size: 12px;
+            border-collapse: collapse;
+            margin-left: auto;
+            margin-right: auto;
+            border-top: 2px solid #999999;
+            border-bottom: 2px solid #999999;
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 1px;
+            padding-left: 4px;
+            padding-right: 4px;
+            /* border: 1px solid #dee2e6; */
+            text-align: left;
+        }
+        .data-table tbody tr:nth-child(odd) {
+            background-color: #eeeeee;
+        }
+
+        .excerpt-item {
+            margin-bottom: 16px;
+            padding: 12px;
+            background: #f8f9fa;
+            border-left: 4px solid #007F7F;
+            border-radius: 0 4px 4px 0;
+        }
+
+        .excerpt-source {
+            font-size: 11px;
+            color: #6c757d;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .excerpt-text {
+            font-style: italic;
+            line-height: 1.5;
+        }
+
+        /* Git Tree Timeline */
+        .timeline {
+            position: relative;
+            padding-left: 40px;
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 24px;
+            padding: 16px;
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -28px;
+            top: 20px;
+            width: 12px;
+            height: 12px;
+            background: #007F7F;
+            border-radius: 50%;
+            border: 3px solid white;
+            box-shadow: 0 0 0 2px #007F7F;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: -22px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #dee2e6;
+        }
+
+        .commit-hash {
+            font-family: 'Monaco', 'Consolas', monospace;
+            font-size: 11px;
+            color: #6c757d;
+            margin-bottom: 8px;
+        }
+
+        .commit-message {
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .commit-details {
+            font-size: 13px;
+            color: #6c757d;
+            line-height: 1.4;
+        }
+
+        .branch-indicator {
+            display: inline-block;
+            padding: 2px 8px;
+            font-size: 11px;
+            background: #e8f5e8;
+            color: #007F7F;
+            border-radius: 12px;
+            margin-bottom: 8px;
+        }
+
+        /* Chat Interface */
+        .chat-container {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding-bottom: 20px;
+        }
+
+        .message {
+            margin-bottom: 16px;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .message.user {
+            flex-direction: row-reverse;
+        }
+
+        .message-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+            color: white;
+        }
+
+        .user .message-avatar {
+            background: #007bff;
+        }
+
+        .assistant .message-avatar {
+            background: #28a745;
+        }
+
+        .message-content {
+            flex: 1;
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-size: 14px;
+            line-height: 1.4;
+            max-width: 80%;
+        }
+
+        .user .message-content {
+            background: #007bff;
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        .assistant .message-content {
+            background: #f8f9fa;
+            color: #2c3e50;
+            border-bottom-left-radius: 4px;
+        }
+
+        .chat-input-container {
+            border-top: 1px solid #dee2e6;
+            padding: 16px;
+            background: #f8f9fa;
+        }
+
+        .chat-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #dee2e6;
+            border-radius: 24px;
+            font-size: 14px;
+            outline: none;
+            resize: none;
+        }
+
+        .chat-input:focus {
+            border-color: #28a745;
+            box-shadow: 0 0 0 2px rgba(40, 167, 69, 0.25);
+        }
+
+        /* Utility classes */
+        .text-muted {
+            color: #6c757d !important;
+        }
+
+        .font-mono {
+            font-family: 'Monaco', 'Consolas', monospace;
+        }
+
+        .small {
+            font-size: 12px;
+        }
+
+        .climate-risk {
+            background: linear-gradient(135deg, #e8f5e8, #f8f9fa);
+            border: 1px solid #28a745;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Left Panel - PDF Viewer -->
+        <div class="pdf-panel">
+            <div class="pdf-header">
+                Climate Stress Tests & Scenarios: A Living Review [v2023.04]
+            </div>
+            <div class="pdf-viewer">
+                <div class="pdf-content">
+                    <h1 style="margin-bottom: 20px; color: #007F7F;">1 Problem</h1>                    
+                    <h2 style="margin: 24px 0 4px 0; color: #007F7F;">1.1 Introduction</h2>
+                    <p class="pdf-para" style="margin-bottom: 16px;">
+                        After the Global Financial Crisis (GFC) in 2008-2009, bank stress tests became an integral
+                        part of financial supervisors’ risk management toolkit. Through large-scale stress tests,
+                        supervisors simulate shocks to whole economy or some sectors to gauge the exposure of
+                        financial institutions (FIs from henceforth) to financial risks such as credit risk, market risk,
+                        liquidity risk, and operational risk. A climate stress test is designed to measure a FI’s
+                        exposure to and impact of climate risks1, using scenario analysis which is a function of
+                        different climate shocks (Baudino & Svoronos, 2021). Contrary to traditional stress tests
+                        which rely on historical data and statistical modelling focused on short-term risks, a climate
+                        stress test is a forward-looking exercise, with time horizons spanning from 5 to 30 years.2
+                    </p>
+                    <p  class="pdf-para" style="margin-bottom: 16px;">
+                        The inherently different nature of the financial risks analyzed in climate stress tests implies
+                        several methodological features that are specific to this kind of exercise. For example, there
+                        is a lack of knowledge of the feedback loops between climate change and the economy and
+                        of the transition risks related to policy choices. As a consequence, climate stress test
+                        scenarios are more speculative because they attempt to assign probabilities over
+                        never-before-seen natural and economic processes. The deep uncertainty over both physical
+                        and transition risks can therefore mitigate the usefulness of these tests for prudential
+                        regulation.
+                    </p>
+                    <p  class="pdf-para" style="margin-bottom: 16px;">
+                        Although climate stress testing is still in its early stages, several jurisdictions have
+                        announced or even completed climate stress tests (Table 1). To facilitate and
+                        standardize the process, the Network for Greening the Financial Systems (NGFS) provides
+                        guidance for implementing a climate stress test, including scenario design and technical
+                        support.
+                    </p>
+
+                    <div style="text-align:center; margin-bottom:12px; font-size:13px; color:#6c757d;">
+                        <em>Table 1. Overview of institutions engaged in climate stress tests in G20 countries</em>
+                    </div>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Country</th>
+                                <th>Institution</th>
+                                <th>Status</th>
+                                <th>Year</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>🇮🇩</td>
+                                <td>Bank Indonesia</td>
+                                <td>Concluded</td>
+                                <td>2022</td>
+                            </tr>
+                            <tr>
+                                <td>🇫🇷</td>
+                                <td>Banque de France</td>
+                                <td>Concluded</td>
+                                <td>2021</td>
+                            </tr>
+                            <tr>
+                                <td>🇮🇹</td>
+                                <td>Banca d’Italia</td>
+                                <td>Concluded</td>
+                                <td>2021</td>
+                            </tr>
+                            <tr>
+                                <td>🇪🇺</td>
+                                <td>European Central Bank & European Banking Agency</td>
+                                <td>Concluded</td>
+                                <td>2021</td>
+                            </tr>
+                            <tr>
+                                <td>🇨🇦</td>
+                                <td>Bank of Canada</td>
+                                <td>Concluded</td>
+                                <td>2021</td>
+                            </tr>
+                            <tr>
+                                <td>🇿🇦</td>
+                                <td>South African Reserve Bank</td>
+                                <td>Concluded</td>
+                                <td>2021</td>
+                            </tr>
+                            <tr>
+                                <td>🇨🇳</td>
+                                <td>People’s Bank of China</td>
+                                <td>Concluded</td>
+                                <td>2022</td>
+                            </tr>
+                            <tr>
+                                <td>🇯🇵</td>
+                                <td>Japan Financial Services Agency & Bank of Japan</td>
+                                <td>Concluded</td>
+                                <td>2022</td>
+                            </tr>
+                            <tr>
+                                <td>🇬🇧</td>
+                                <td>Bank of England</td>
+                                <td>Concluded</td>
+                                <td>2022</td>
+                            </tr>
+                            <tr>
+                                <td>🇰🇷</td>
+                                <td>Bank of Korea</td>
+                                <td>Concluded</td>
+                                <td>2022</td>
+                            </tr>
+                            <tr>
+                                <td>🇲🇽</td>
+                                <td>Banco de Mexico</td>
+                                <td>In Progress</td>
+                                <td>-</td>
+                            </tr>
+                            <tr>
+                                <td>🇧🇷</td>
+                                <td>Banco Central do Brasil</td>
+                                <td>In Progress</td>
+                                <td>-</td>
+                            </tr>
+                            <tr>
+                                <td>🇦🇺</td>
+                                <td>Australian Prudential Regulation Authority</td>
+                                <td>In Progress</td>
+                                <td>-</td>
+                            </tr>
+                            <tr>
+                                <td>🇩🇪</td>
+                                <td>Bundesbank</td>
+                                <td>In Progress</td>
+                                <td>-</td>
+                            </tr>
+                            <tr>
+                                <td>🇮🇳</td>
+                                <td>Reserve Bank of India</td>
+                                <td>In Planning</td>
+                                <td>-</td>
+                            </tr>
+                            <tr>
+                                <td>🇺🇸</td>
+                                <td>Federal Reserve</td>
+                                <td>In Planning</td>
+                                <td>-</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h2 style="margin: 24px 0 4px 0; color: #007F7F;">1.2 Implementation of a Climate Stress Test</h2>
+                    <h3 class="pdf-para"  style="margin: 0 0 0 0; color: #34495e;">1.2.1 Two approaches: top-down vs bottom-up</h2>
+                    <p  class="pdf-para" style="margin-bottom: 16px;">
+                        According to the UNEP FI’s Comprehensive Good Practice Guide to Climate Stress Test
+                        (UNEPFI, 2021), there are two approaches to performing a stress test—a top-down and a
+                        bottom-up approach. A top-down approach is when a supervisory authority performs the
+                        test itself, using its own framework, which consists of a specific methodology, and its own
+                        data. A bottom-up approach is when a FI uses its own framework and proprietary data but
+                        adopts scenarios established by the supervisors as part of an economy-wide supervisory
+                        exercise.
+                    </p>
+                    <p  class="pdf-para" style="margin-bottom: 16px;">
+                        Both approaches have advantages and disadvantages (European Banking Authority, 2016).
+                        On one hand, top-down tests input official data into a homogeneous framework, without
+                        much participation from the FIs that are the object of the analysis. The results are
+                        comparable across FIs and provide an all-encompassing view of the climate-related risks 
+                        faced by the pool of the institutions tested. In addition, the top-down approach is best for
+                        assessing systemic risk as it can also capture interconnectedness between FIs and the
+                        systemic dimension of climate risks. However, official data used to estimate physical and
+                        transition risks often come in an aggregated form, thus lacking the granularity required to
+                        pin down the exposure of individual FIs to climate risks. As a result, individual FIs may be
+                        reluctant to implement the recommendations.
+                    </p>
+                    <p  class="pdf-para" style="margin-bottom: 16px;">
+                        On the other hand, bottom-up tests are run with FIs’ proprietary data, guaranteeing a
+                        higher level of granularity to the analysis. This kind of stress test can reveal not only the
+                        risks the whole sector is exposed to but also risks specific to the different banks under
+                        supervision. In this way, bottom-up stress tests could trigger a positive chain reaction by
+                        increasing the pressure on banks to improve transparency and availability of appropriate
+                        data, which will in turn increase the pressure on the banks’ borrowers to do the same. The
+                        main drawback of self-assessment is that individual FIs may underestimate their exposure
+                        to avoid undesirable interventions from the regulator. In addition, bottom-up test results are
+                        not always comparable across the financial sector, failing to provide a consistent view of the
+                        state of the sector. Lastly, stress tests are resource-intensive and individual FIs may lack the
+                        expertise and the capital to develop robust modeling frameworks.
+                    </p>
+
+                   <h3 class="pdf-para"  style="margin: 0 0 0 0; color: #34495e;">1.2.2 Macro-type data</h2>
+                    <p  class="pdf-para" style="margin-bottom: 16px;">
+                        The inputs of climate stress tests are macro-financial data and climate-related data.
+                        Macro-financial data include: i) macroeconomic indicators such as GDP, interest rates,
+                        inflation rates, unemployment, and population growth, and ii) finance-related information
+                        and metrics like portfolio composition, balance sheets, default probabilities and associated
+                        losses. Climate-related data include: i) historical information and projections regarding
+                        physical risks such as floods and other extreme weather events, ii) data on transition risks
+                        emanating from new policies which could lead to stranded assets and abrupt decreases in
+                        asset values, iii) client data such as the geographical location of the FIs’ assets, and iv)
+                        company-level emissions data whose equity is on FIs’ portfolios.
+                    </p>
+                    <p  class="pdf-para" style="margin-bottom: 16px;">
+                        Macro-financial data are also used as an input to standard portfolio-level risk models, thus it
+                        is often readily available to both regulators and participant institutions. The collection of
+                        climate-related data though is a novel task for many FIs and it is associated with new
+                        challenges: limited availability, poor quality, and limited comparability (Network for
+                        Greening the Financial System, 2022b). A recent survey from UNEP FI’s TCFD program
+                        (UNEPFI, 2021) revealed that 60% of FIs responding to the questionnaire were not confident
+                        in their ability to collect climate hazard data, with only 4% being quite confident. The NGFS
+                        2022 report on “Bridging the data gap” (Network for Greening the Financial System, 2022b)
+                        finds that climate stress tests require emission data, biophysical and geospatial information
+                        for which there are no available sources. To address this issue, NGFS encourages FIs to
+                        increase efforts towards mutually shared taxonomies and to develop well-defined metrics
+                        and standards.
+                    </p>
+
+                    <h3 class="pdf-para"  style="margin: 0 0 0 0; color: #34495e;">1.2.3 Scenarios</h2>
+                    <p  class="pdf-para" style="margin-bottom: 16px;">
+                        Standard stress testing relies on historical data and narrowly focuses on short-term
+                        macro-financial trends, but climate stress testing involves deep uncertainty over the
+                        evolution of system-wide factors that unfold in long time horizons (Network for Greening
+                        the Financial System, 2020). The inability to attribute probabilities to potential outcomes
+                        renders challenging the design of future scenarios, a crucial element of stress tests. To help 
+                        institutions in this process, in September 2022 the NGFS published the third vesrion of its
+                        comprehensive framework with six different scenarios (Figure 1) in terms of the typology of
+                        risk (physical and transition) and the size of the risk (low or high)3.
+                    </p>
+
+                    <div style="text-align:center; margin-bottom:12px; font-size:13px; color:#6c757d;">
+                        <em>Figure 1. NGFS Scenario framework</em>
+                    </div>
+                    <img 
+                        src="static/ngfs-scenarios-2022.png" alt="NGFS Climate Scenarios Overview" 
+                        style="display:block; max-width: 480px; width:100%; margin:24px auto 16px auto; border:1px solid #dee2e6; border-radius:8px; box-shadow:0 2px 8px rgba(44,62,80,0.08); background:#f8f9fa;" 
+                    >
+
+                    <p class="pdf-para" style="margin-bottom: 4px; padding-top: 16px">
+                        Each NGFS scenario assumes a different evolution of emissions, temperatures, and climate policies:
+                    </p>
+                     <ul style="list-style-position: outside; padding-left: 32px; width: 80%; padding-bottom: 8px;">
+                        <li>
+                            <b>Net Zero 2050 Scenario:</b> 
+                            Emissions reach net zero in 2050 and global warming is limited
+                            to 1.5 °C. The transition is considered to be orderly, as major economies eliminate all GHGs
+                            thanks to the enforcement of strict climate policies. The stringency of these policies poses a
+                            high transition risk compared to the other orderly scenarios but ensures a relatively low
+                            physical risk.
+                        </li>
+                        <li>
+                            <b>Below 2°C Scenario:</b> 
+                            Climate policies are implemented more gradually with respect to
+                            the above scenario, so the probability of limiting global warming to below 2°C is still high
+                            but not as high as in the “Net Zero 2050.” For this reason, while this scenario is orderly, the
+                            physical risk is higher and the transition risk is lower.
+                        </li>
+                        <li>
+                            <b>Divergent Net Zero Scenario:</b> 
+                            Climate policies aimed at limiting global warming to 1.5 °C
+                            are implemented but not uniformly across sectors. In this scenario, the transition risk is the
+                            highest because the scattered implementation of climate policies could generate market
+                            asymmetries and lead to instability.
+                        </li>
+                        <li>
+                            <b>Delayed 2°C Scenario:</b> 
+                            Climate policies are implemented but too slowly and the
+                            reduction of emissions starts only after 2030. The transition is disorderly because a slow
+                            start implies a later acceleration in the implementation of policies, whereas gradual 
+                            enforcement would be more desirable. Physical risk is relatively high because a late
+                            implementation translates also into slow carbon removal. Under this scenario, only with
+                            very strict policies global warming stays below 2°C.
+                        </li>
+                        <li>
+                            <b>Nationally Determined Contributions (NDCs) Scenario:</b> 
+                            All currently pledged policies
+                            are expected to be implemented. Given the consensus view that current policies are not
+                            enough to limit global warming below 2°C, the physical risk is very high. Transition risk, on
+                            the other hand, is low but still not negligible.
+                        </li>
+                        <li>
+                            <b>Current Policies Scenario:</b> 
+                            Only existing policies are preserved, with no further
+                            implementation of the ones that are currently pledged. Physical risk is at its highest because
+                            existing policies are nowhere near the desired effort to fight climate change. Obviously,
+                            transition risk is null because the economy would operate in a business-as-usual fashion.
+                        </li>
+                    </ul> 
+                    <p  class="pdf-para" style="margin-bottom: 16px;">                
+                        So far, stress tests have been used by supervisors to engage with financial institutions on
+                        climate risks, to gather information about their exposure, and to assess their ability to
+                        absorb climate shocks. They are currently not used to derive new regulatory requirements
+                        (Baudino & Svoronos, 2021). In spite of this, one common result of the climate stress tests
+                        run in the jurisdictions of the E-axes Forum webinar panelists, was that there are overall
+                        losses under both the orderly phasing-in of policies and the delayed or disorderly transition
+                        but for the former path the losses are lower and more manageable. 
+                    </p>
+
+                    <h1 style="margin-bottom: 20px; color: #007F7F;">2 Theory and Empirical Evidence</h1>                    
+                    <h2 style="margin: 24px 0 4px 0; color: #007F7F;">2.1 Availability of Appropriate Data</h2>
+                    <p  class="pdf-para" style="margin-bottom: 16px;">                
+                        So far, stress tests have been used by supervisors to engage with financial institutions on
+                        climate risks, to gather information about their exposure, and to assess their ability to
+                        absorb climate shocks. They are currently not used to derive new regulatory requirements
+                        (Baudino & Svoronos, 2021). In spite of this, one common result of the climate stress tests
+                        run in the jurisdictions of the E-axes Forum webinar panelists, was that there are overall
+                        losses under both the orderly phasing-in of policies and the delayed or disorderly transition
+                        but for the former path the losses are lower and more manageable. 
+                    </p>
+                    <p  class="pdf-para" style="margin-bottom: 16px;">                
+                        To perform a meaningful climate stress test, both supervisory institutions and FIs should
+                        develop robust procedures to collect and process climate data. In its 2021 report on
+                        “Climate-related financial risks”, the Bank for International Settlements lists three broad
+                        data categories that should be used: i) data describing physical and transition risk drivers5
+                        or geographical data (i.e. coastal elevation models or satellite imagery) to forecast future
+                        events.; ii) data describing the vulnerability of exposures6, and iii) financial exposure data7.
+                    </p>
+                    <p  class="pdf-para" style="margin-bottom: 16px;">                
+                        So far, the NGFS provided insufficient data to conducts meaningful stress tests. One possible
+                        solution for FIs is represented by third-party data providers, which develop models and data 
+                        that link the NGFS-scenario outputs to firm-level or sectoral-level impacts. It is thanks to
+                        these impacts that policymakers and banks are able to assess the climate risks on their
+                        balance sheet. In this sense, third-party providers fill a gap that would otherwise force
+                        banks and regulators to make huge analytical efforts that is unfeasible for most
+                        institutions8. UNEP FI’s report (2021) provides a guideline for institutions for gathering
+                        physical and transition risk data from external data providers. The recommendations
+                        include: i) identifying open-source platforms9, ii) designing a questionnaire to determine
+                        the coverage and the methodologies of the providers, iii) communicating with data
+                        providers and collaborating with them. However, even though third-party providers may
+                        support institutions in gathering quality data, <strong>a more concerted effort by financial
+                        institutions and supervisors is likely to be needed</strong>. Tan Schelling, senior economist at
+                        the Financial Stability division of the Swiss National Bank, argued during the recent E-Axes
+                        Forum webinar on Climate Stress Testing that “As climate change is a global phenomenon,
+                        the metrics and the definition of data should be consistent across jurisdictions, so there can
+                        be comparability. [..] If the definitions are so far apart, the data is not useful anymore.” He
+                        added that the Task Force for Climate-Related Financial Disclosures (TCFD) framework is
+                        helping to improve the comparability, but so far has only defined categories of metrics, and
+                        not metrics themselves.
+                    </p>
+                    <p  class="pdf-para" style="margin-bottom: 16px;">                
+                        Academic literature could offer some novel ways to analyze climate-related risks in financial
+                        institutions’ asset portfolios. For example, Battiston et al. (2017) develop a network-based
+                        climate stress-test methodology which they apply to large Euro Area banks using a ‘green’
+                        and a ‘brown’ scenario. With this methodology, the authors were able to generate data on
+                        investors’ equity loss caused by the “brown” scenario. Faiella et al. (2021) use micro-level
+                        data on households’ and firms’ energy accounts to estimate the impact of a transition shock
+                        on Italian firms and identify sector-specific effects. Another paper by Grippa et al. (2020)
+                        contributes to the generation of insightful granular data on loan losses. The authors explore
+                        three different transmission channels of a transition shock on the Norwegian financial
+                        systems and find that the impact on banks is significant but manageable.
+                    </p>
+                    <p  class="pdf-para" style="margin-bottom: 16px;">                
+                        According to Engle et al. (2020), a valid complement to traditional stress tests is
+                        market-based stress tests. He argues that these are inexpensive, non-invasive, and use easily
+                        updatable methodologies that may be used to confirm or challenge the results of stress tests
+                        run by supervisory institutions. These stress tests rely on market data, so they reflect risks
+                        that are priced in financial markets10.
+                    </p>
+                    <p  class="pdf-para" style="margin-bottom: 16px;">                
+                        Market-based methodologies may well be applied to climate stress tests. For example, Jung
+                        et al. (2022) use stock returns and accounting data of large global banks in the U.S., U.K.,
+                        France, and Japan to estimate a measure called CRISK, systemic climate risk, which is the
+                        expected capital shortfall of a financial institution contingent upon a climate stress scenario.
+                        Another paper that employs a market-based approach to measure firms’ vulnerability to
+                        climate change is Reinders et al. (2023b). In addition to equity data, they also use debt
+                        instruments such as mortgages. They apply a Merton contingent claims model (Merton,
+                        1974) to Dutch banks, drawing from Merton’s insight that a negative asset valuation shock
+                        will affect the value of both equity and debt in a non-linear manner. In their paper, the
+                        negative shock is caused by the implementation of a carbon tax. They conclude that the
+                        market value of banks’ assets is extremely sensitive to the price of carbon.
+                    </p>
+
+                    <h2 style="margin: 24px 0 4px 0; color: #007F7F;">2.2 Building Severe Scenarios</h2>
+                    <p  class="pdf-para" style="margin-bottom: 16px;">                
+                        Even if the supervisor can collect a large swath of high-quality and granular data on both
+                        macro-financial variables and climate-related variables, the results of a climate stress test
+                        are dependent on the scenarios selected for the modeling. Given the deep uncertainty
+                        regarding the future evolution of climate change and its impact on the economy, it is
+                        difficult to calibrate what a worst-case scenario might be.
+                    </p>
+                    <p  class="pdf-para" style="margin-bottom: 16px;">                
+                        During his intervention in the E-Axes Forum webinar, Tan Schelling argues that "the NGFS
+                        leaves a wide space open about how to model the shock" for firms and households. This
+                        makes it difficult to assess the severity of a scenario. Julia Trabert, Senior Supervisor at the
+                        European Central Bank, added that the worst-case scenario “depends on the model that you
+                        choose.” But, as Schelling argued, “the NGFS leaves a wide space open about how to model
+                        the shock,” confirming that supervisors lack a clear way forward in scenario design. What is
+                        certain is what Cassandra Archer, Co-Head of the Climate Club at the Bank of England,
+                        reckoned: “The extreme cases are not taken into consideration in climate stress tests, as
+                        opposed to normal stress tests,” the implication being that climate stress tests might be
+                        underestimating the impact of climate change on the financial sector (Financial Stability
+                        Board & Network for Greening the Financial System, 2022).
+                    </p>
+
+                    <p class="pdf-para" style="margin-bottom: 4px;">                
+                        For scenarios to be severe, at least three assumptions should be included:
+                    </p>
+                     <ul style="list-style-position: outside; padding-left: 32px; width: 80%; padding-bottom: 8px;">
+                        <li>
+                            <b>Severity:</b> Cost estimates should be derived from the upper range of the worst scenario. In
+                            the case of physical risk, institutions should consider extreme temperature increases in the
+                            top range of the highest estimates. In the case of transition risk, a very disorderly and rapid
+                            transition should be assumed
+                        </li>
+                        <li>
+                            <b>Time horizon:</b> The physical damages should manifest earlier and more rapidly than the
+                            consensus expects. For example, the worst-case scenario should place the physical costs of
+                            climate change on a much shorter time horizon, 5-10 years into the future, and an even
+                            shorter horizon for transition costs, less than 5 years from the time of the test.
+                        </li>
+                        <li>
+                            <b>Expectations shift:</b> Scenarios should also consider a rapid and abrupt deterioration in
+                            financial markets’ sentiment related to climate change. This idea may well be reflected by
+                            some sort of “expectations tipping point,” when financial markets start anticipating a more
+                            devastating future physical damage and a more rapid transition which would lead to an
+                            abrupt and downward repricing of financial assets. Notably, the risk of an “expectations
+                            tipping point” does not appear to be currently priced in.
+                        </li>
+                    </ul> 
+
+                    <h2 style="margin: 24px 0 4px 0; color: #007F7F;">2.3 Other Challenges</h2>
+                    <p  class="pdf-para" style="margin-bottom: 16px;">                
+                        There are still limitations to traditional stress testing methodologies in assessing the impact
+                        of climate change and informing prudential policies (Reinders et al., 2023a). First, the
+                        long-term and non-linear nature of climate risks pose challenges to existing models. As Tan
+                        Schelling asserts, policymakers and financial institutions have generally focused on
+                        evaluating financial risks, such as credit or market risks, over considerably shorter
+                        timeframes. Consequently, a fundamental shift in modeling approaches is essential to
+                        address the nature climate risks, a shift that is already taking place. Second, the uncertainty
+                        around the evolution of climate over the next decades, which also depends on potential
+                        climate policies and their different implementation across jurisdictions, represents an
+                        additional source of variability to be addressed via forward-looking scenario analyses.
+                        Finally, a high degree of complexity arises from the interactions between a multitude of 
+                        economic agents, particularly between the real economy and the financial sector.
+                    </p>
+
+                    <h1 style="margin-bottom: 20px; color: #007F7F;">3 Policy Recommendation</h1>                                        
+                    <p  class="pdf-para" style="margin-bottom: 16px;">                
+                        In general, climate stress tests are an important tool that allows supervisors to gauge the
+                        potential impact of climate shocks on different dimensions of financial risk. Depending on
+                        the specific methodology, conducting these exercises may be time-consuming and
+                        resource-intensive from the FIs’ perspective, but overall the feedback from the industry “is
+                        generally positive, because doing the exercise highlighted some weaknesses in their risk
+                        management,” as Cassandra Archer explained. Policymakers also benefit from the results of
+                        climate stress tests as they acquire a comprehensive view of the fragility of the financial
+                        system, often with a sector-specific focus. For example, Cassandra Archer told the E-Axes
+                        Forum that “insurers have more capabilities than banks for managing physical risks."
+                        Despite all the methodological limitations outlined in the previous section, climate stress
+                        tests can still be useful to inform macroprudential policies such as system risk buffers and
+                        concentration limits (Monnin, 2022). In fact, climate stress tests improve data quality and
+                        availability, encourage rigorous risk management, and prevent the build-up of climate
+                        systemic risk over time.
+                    </p>
+                    <p  class="pdf-para" style="margin-bottom: 16px;">                
+                        In order to enrich their assessments, supervisors should include a “financial action”
+                        scenario, in which no policy is implemented by governments but the financial sector
+                        significantly reallocates funding flows toward supporting the transition to net zero. This
+                        would be the positive “private sector solution” version of a no-policy scenario. Hopefully, a
+                        financial sector private initiative could i) incentivize FIs to support the transition, in order to
+                        hedge against a climate crisis and the subsequent significant damages, and ii) highlight the
+                        market penalty individual FIs might incur from not following the climate mitigation
+                        alignment of the rest of the financial sector.
+                    </p>
+                    <p  class="pdf-para" style="margin-bottom: 16px;">                
+                        Alternatively to carrying out economy-wide climate stress test to gauge system risk,
+                        supervisors can require institutions to incorporate climate risks in their internal stress tests
+                        (European Central Bank, 2020) while providing them with a clear methodology so that
+                        quantitative bottom-up stress tests are more comparable(European Central Bank, 2022).
+                        Also, they can assess the progress of FIs internal climate risks stress testing practices and
+                        share outstanding case studies11.
+                    </p>
+                    <p  class="pdf-para" style="margin-bottom: 16px;">                
+                        Besides fully-fledged climate stress tests, another way for supervisors to start thinking
+                        about macroprudential policies regarding climate change is through the use of exploratory
+                        scenario analysis. These scenarios are not forecasts of the most likely future outcomes.
+                        Instead, they delineate pathways toward limiting the rise in global temperatures as a
+                        function of future climate policies, technological developments, and consumer behavior.
+                        With this tool, supervisors develop scenarios that help the financial sector identify, measure
+                        and disclose climate-related risks. For example, The Bank of Canada and Office of the
+                        Superintendent of Financial Institutions (OSFI) published in January 2022 a report about a
+                        pilot exercise they conducted with six national financial institutions (Bank of Canada and
+                        Office of the Superintendent of Financial Institutions, 2022). For the purpose of this pilot,
+                        they ask the participating FIs to simulate various stress scenarios reflecting ambitious
+                        climate policies and the pace of technological change. The OSFI report concludes by 
+                        suggesting that institutions might gradually increase banking sector capitalization until
+                        2025 to be ready for the worst-case shock.
+                    </p>
+               </div>
+            </div>
+        </div>
+
+        <!-- Right Panel - Tabbed Interface -->
+        <div class="right-panel">
+            <div class="tab-header">
+                <button class="tab-button active" onclick="switchTab('references')">References</button>
+                <button class="tab-button" onclick="switchTab('knowledge-base')">Information Base</button>
+                <button class="tab-button" onclick="switchTab('timeline')">Timeline</button>
+                <button class="tab-button" onclick="switchTab('chat')">AI Assistant</button>
+            </div>
+
+            <div class="tab-content">
+                <!-- References Tab -->
+                <div id="references" class="tab-pane">
+                    <table class="references-table">
+                        <thead>
+                            <tr>
+                                <th></th>
+                                <th>Title</th>
+                                <th>Year</th>
+                                <th>Source</th>
+                                <th>Link</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>[1]</td>
+                                <td>Using scenario analysis to assess climate transition risk</td>
+                                <td>2022</td>
+                                <td>Bank of Canada and Office of the Superintendent of Financial Institutions</td>
+                                <td><a href="https://www.bankofcanada.ca/wp-content/uploads/2021/11/BoC-OSFI-Using-Scenario-Analysis-to-Assess-Climate-Transition-Risk.pdf" target="_blank">link</a></td>
+                            </tr>
+                            <tr>
+                                <td>[2]</td>
+                                <td>Results of the 2021 climate biennial exploratory scenario (cbes)</td>
+                                <td>2022</td>
+                                <td>Bank of England</td>
+                                <td><a href="https://www.bankofengland.co.uk/stress-testing/2022/results-of-the-2021-climate-biennial-exploratory-scenario" target="_blank">link</a></td>
+                            </tr>
+                            <tr>
+                                <td>[3]</td>
+                                <td>A first assessment of financial risks stemming from climate change.</td>
+                                <td>2021</td>
+                                <td>Bank de France</td>
+                                <td><a href="https://acpr.banque-france.fr/sites/default/files/medias/documents/20210602_as_exercice_pilote_english.pdf" target="_blank">link</a></td>
+                            </tr>
+                            <tr>
+                                <td>[4]</td>
+                                <td>A climate stress-test of the financial system</td>
+                                <td>2017</td>
+                                <td>Nature Climate Change</td>
+                                <td><a href="https://doi.org/10.1038/nclimate3255" target="_blank">link</a></td>
+                            </tr>
+                            <tr>
+                                <td>[5]</td>
+                                <td>Stress-testing banks for climate change – a comparison of practices</td>
+                                <td>2021</td>
+                                <td>Bank for International Settlements</td>
+                                <td><a href="http://www.bis.org/emailalerts.htm." target="_blank">link</a></td>
+                            </tr>
+                            <tr>
+                                <td>[6]</td>
+                                <td>Hedging climate change news</td>
+                                <td>2020</td>
+                                <td>The Review of Financial Studies</td>
+                                <td><a href="https://doi.org/10.1093/rfs/hhz072" target="_blank">link</a></td>
+                            </tr>
+                            <tr>
+                                <td>[7]</td>
+                                <td>Draft guidelines on stress testing and supervisory stress testing.</td>
+                                <td>2016</td>
+                                <td>European Banking Authority</td>
+                                <td><a href="https://www.eba.europa.eu/sites/default/documents/files/documents/10180/2282644/2b604bc8-fd08-4b17-ac4a-cdd5e662b802/Guidelines%20on%20institutions%20stress%20testing%20%28EBA-GL-2018-04%29.pdf" target="_blank">link</a></td>
+                            </tr>
+                            <tr>
+                                <td>[8]</td>
+                                <td>Guide on climate-related and environmental risks.</td>
+                                <td>2020</td>
+                                <td>European Central Bank</td>
+                                <td><a href="https://www.bankingsupervision.europa.eu/ecb/pub/pdf/ssm.202011finalguideonclimate-relatedandenvironmentalrisks~58213f6564.en.pdf" target="_blank">link</a></td>
+                            </tr>
+                            <tr>
+                                <td>[9]</td>
+                                <td>2022 climate risk stress test.</td>
+                                <td>2022</td>
+                                <td>European Central Bank</td>
+                                <td><a href="https://www.bankingsupervision.europa.eu/ecb/pub/pdf/ssm.climate_stress_test_report.20220708~2e3cc0999f.en.pdf" target="_blank">link</a></td>
+                            </tr>
+                            <tr>
+                                <td>[10]</td>
+                                <td>A micro-founded climate stress test on the financial vulnerability of italian households and firms.</td>
+                                <td>2021</td>
+                                <td>Banca D'Italia</td>
+                                <td><a href="https://www.bancaditalia.it/pubblicazioni/qef/2021-0639/QEF_639_21.pdf" target="_blank">link</a></td>
+                            </tr>
+                            <tr>
+                                <td>[11]</td>
+                                <td>Climate scenario analysis by jurisdictions initial findings and lessons.</td>
+                                <td>2022</td>
+                                <td>Financial Stability Board, & Network for Greening the Financial System</td>
+                                <td><a href="https://www.ngfs.net/sites/default/files/medias/documents/climate_scenario_analysis_by_jurisdictions_initial_findings_and_lessons.pdf" target="_blank">link</a></td>
+                            </tr>
+                            <tr>
+                                <td>[12]</td>
+                                <td>Climate finance.</td>
+                                <td>2021</td>
+                                <td>Annual Review of Financial Economics</td>
+                                <td><a href="https://doi.org/10.1146/annurev-financial-102620-103311" target="_blank">link</a></td>
+                            </tr>
+                            <tr>
+                                <td>[13]</td>
+                                <td>Climate-related stress testing: Transition risks in norway.</td>
+                                <td>2020</td>
+                                <td>IMF</td>
+                                <td><a href="https://www.imf.org/en/Publications/WP/Issues/2020/11/08/Climate-Related-Stress-Testing-Transition-Risks-in-Norway-49835" target="_blank">link</a></td>
+                            </tr>
+                            <tr>
+                                <td>[14]</td>
+                                <td>Central banking challenges posed by uncertain climate change and natural disasters.</td>
+                                <td>2022</td>
+                                <td>Journal of Monetary Economics</td>
+                                <td><a href="https://doi.org/10.1016/j.jmoneco.2021.09.010" target="_blank">link</a></td>
+                            </tr>
+                            <tr>
+                                <td>[15]</td>
+                                <td>Cmip6: the next generation of climate models explained.</td>
+                                <td>2019</td>
+                                <td>Hausfather, Z.</td>
+                                <td><a href="https://www.carbonbrief.org/cmip6-the-next-generation-of-climate-models-explained/" target="_blank">link</a></td>
+                            </tr>
+                            <tr>
+                                <td>[16]</td>
+                                <td>Climate finance.</td>
+                                <td>2020</td>
+                                <td>The Review of Financial Studies</td>
+                                <td><a href="https://doi.org/10.1093/rfs/hhz146" target="_blank">link</a></td>
+                            </tr>
+                            <tr>
+                                <td>[17]</td>
+                                <td>Global energy and carbon model</td>
+                                <td>2022</td>
+                                <td>International Energy Agency</td>
+                                <td><a href="https://iea.blob.core.windows.net/assets/2db1f4ab-85c0-4dd0-9a57-32e542556a49/GlobalEnergyandClimateModelDocumentation2022.pdf" target="_blank">link</a></td>
+                            </tr>
+                            <tr>
+                                <td>[18]</td>
+                                <td>Climate stress testing</td>
+                                <td>2022</td>
+                                <td>Federal Reserve Bank of New York Staff Reports</td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>[19]</td>
+                                <td>Climate change 2021: The physical science basis. contribution of working group i to the sixth assessment report of the intergovernmental panel on climate change. </td>
+                                <td>2021</td>
+                                <td>Cambridge University Press</td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>[20]</td>
+                                <td>The rcp greenhouse gas concentrations and their extensions from 1765 to 2300.</td>
+                                <td>2011</td>
+                                <td>Climatic Change</td>
+                                <td><a href="https://doi.org/10.1007/s10584-011-0156-z" target="_blank">link</a></td>
+                            </tr>
+                            <tr>
+                                <td>[21]</td>
+                                <td>On the pricing of corporate debt: the risk structure of interest rates.</td>
+                                <td>1974</td>
+                                <td>The Journal of Finance</td>
+                                <td><a href="https://doi.org/10.1111/j.1540-6261.1974.tb03058.x" target="_blank">link</a></td>
+                            </tr>
+                            <tr>
+                                <td>[22]</td>
+                                <td>Is the current macroprudential framework fit for climate systemic risk?</td>
+                                <td>2022</td>
+                                <td>Council on Economic Policies</td>
+                                <td><a href="https://www.cepweb.org/is-the-current-macroprudential-framework-fit-for-climate-systemic-risk/" target="_blank">link</a></td>
+                            </tr>
+                            <tr>
+                                <td>[23]</td>
+                                <td>Guide to climate scenario analysis for central banks and supervisors.</td>
+                                <td>2020</td>
+                                <td>Network for Greening the Financial System</td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>[24]</td>
+                                <td>Scenarios in action: A progress report on global supervisory and central bank climate scenario exercises.</td>
+                                <td>2021</td>
+                                <td>Network for Greening the Financial System</td>
+                                <td><a href="https://www.ngfs.net/sites/default/files/medias/documents/scenarios-in-action-a-progress-report-on-global-supervisory-and-central-bank-climate-scenario-exercises.pdf" target="_blank">link</a></td>
+                            </tr>
+                            <tr>
+                                <td>[25]</td>
+                                <td>Climate scenarios for central banks and supervisors.</td>
+                                <td>2022a</td>
+                                <td>Network for Greening the Financial System</td>
+                                <td><a href="https://www.ngfs.net/sites/default/files/medias/documents/ngfs_climate_scenarios_for_central_banks_and_supervisors_.pdf.pdf" target="_blank">link</a></td>
+                            </tr>
+                            <tr>
+                                <td>[26]</td>
+                                <td>Final report on bridging data gaps executive summary 4.</td>
+                                <td>2022b</td>
+                                <td>Network for Greening the Financial System</td>
+                                <td><a href="https://www.ngfs.net/sites/default/files/medias/documents/ngfs_guide_scenario_analysis_final.pdf" target="_blank">link</a></td>
+                            </tr>
+                            <tr>
+                                <td>[27]</td>
+                                <td>Climate risk stress testing: A conceptual review</td>
+                                <td>2023a</td>
+                                <td>SSRN Electronic Journal</td>
+                                <td><a href="https://doi.org/10.2139/ssrn.4362342" target="_blank">link</a></td>
+                            </tr>
+                            <tr>
+                                <td>[28]</td>
+                                <td>A finance approach to climate stress testing.</td>
+                                <td>2023b</td>
+                                <td>Journal of International Money and Finance</td>
+                                <td><a href="https://doi.org/10.2139/ssrn.3573107" target="_blank">link</a></td>
+                            </tr>
+                            <tr>
+                                <td>[29]</td>
+                                <td>What do you think about climate finance? </td>
+                                <td>2021</td>
+                                <td>Journal of Financial Economics</td>
+                                <td><a href="https://doi.org/10.1016/j.jfineco.2021.08.004" target="_blank">link</a></td>
+                            </tr>
+                            <tr>
+                                <td>[30]</td>
+                                <td>Comprehensive good practice guide to climate stress testing.</td>
+                                <td>2021</td>
+                                <td>UNEPFI</td>
+                                <td><a href="https://www.unepfi.org/publications/good-practice-guide-to-climate-stress-testing/" target="_blank">link</a></td>
+                            </tr>
+                            <tr>
+                                <td>[31]</td>
+                                <td>Central bank and prudential supervisor of institutions.</td>
+                                <td>2018</td>
+                                <td>Vermeulen et al.</td>
+                                <td><a href="http://www.dnb.nl/" target="_blank">link</a></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Knowledge Base Tab -->
+                <div id="knowledge-base" class="tab-pane active">
+
+                    <!-- Annotated Excerpts Section -->
+                    <div class="kb-section climate-risk">
+                        <div class="kb-header" onclick="toggleSection(this)">
+                            <span>📝 Annotated Reference Excerpts</span>
+                            <span>▼</span>
+                        </div>
+                        <div class="kb-content">
+                            <div class="excerpt-item">
+                                <div class="excerpt-source">NGFS Guide, 2020 - Executive Summary</div>
+                                <div class="excerpt-text">"Scenario analysis offers a flexible 'what-if' methodological framework better suited to exploring the risks that could crystallise in different possible futures. Climate risks have long time horizons with high uncertainty about how policy and socio-economic factors might evolve."</div>
+                                <div class="excerpt-source">
+                                    <br>
+                                    <b>Notes</b>: this passage explains...<br>
+                                    <b>Tags</b>: topic:ngfs-scenarios; goal:motivation; ... <br>
+                                    <b>Related Notes</b>: ... 
+                                </div>                            
+                            </div>
+                            <div class="plot-grid">
+                                <div class="excerpt-item">
+                                    <div class="excerpt-source">NGFS Guide, 2020 - Executive Summary</div>
+                                    <div class="plot-placeholder">
+                                        <img 
+                                            src="static/ngfs-scenarios-2022.png" alt="NGFS Climate Scenarios Overview" 
+                                            style="display:block; height:80%;" 
+                                        >
+                                    </div>
+                                    <div class="excerpt-source">
+                                        <br>
+                                        <b>Notes</b>: this figure shows...<br>
+                                        <b>Tags</b>: topic:ngfs-scenarios; goal:overview; perishable; ... <br>
+                                        <b>Related Notes</b>: ... 
+                                    </div>
+                                </div>
+                                <div class="excerpt-item">
+                                    <div class="excerpt-source">NGFS Guide, 2020 - Executive Summary</div>
+                                    <div class="plot-placeholder">
+                                        <table class="data-table" style="height: 80%;">
+                                            <thead>
+                                                <tr>
+                                                    <th>Scenario</th>
+                                                    <th>GDP Impact (%)</th>
+                                                    <th>Financial Sector Losses (EUR bn)</th>
+                                                    <th>Carbon Price (EUR/tonne)</th>
+                                                    <th>Physical Risk Score</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td>Orderly Transition</td>
+                                                    <td>-2.3</td>
+                                                    <td>45.7</td>
+                                                    <td>130</td>
+                                                    <td>Low</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Disorderly Transition</td>
+                                                    <td>-5.8</td>
+                                                    <td>127.4</td>
+                                                    <td>580</td>
+                                                    <td>Medium</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                   <div class="excerpt-source">
+                                        <br>
+                                        <b>Notes</b>: this table reports...<br>
+                                        <b>Tags</b>: topic:cst-results; topic:eu-cst-2021; goal:results; quantitative ... <br>
+                                        <b>Related Notes</b>: ... 
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- NGFS Scenarios Section -->
+                    <div class="kb-section climate-risk">
+                        <div class="kb-header" onclick="toggleSection(this)">
+                            <span>📚 Meta Analyses</span>
+                            <span>▼</span>
+                        </div>
+                        <div class="kb-content">
+                            <div class="plot-grid">
+                                <div class="plot-item">
+                                    <div class="plot-placeholder">NGFS Scenario Comparison</div>
+                                    <div class="plot-caption">Sources: ...</div>
+                                </div>
+                                <div class="plot-item">
+                                    <div class="plot-placeholder">NGFS Scenario Adoption & Implementation</div>
+                                    <div class="plot-caption">Sources: ...</div>
+                                </div>
+                                <div class="plot-item">
+                                    <div class="plot-placeholder">NGFS Scenario Methodologies & Research C</div>
+                                    <div class="plot-caption">Sources: ...</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Stress Test Results Section -->
+                    <div class="kb-section climate-risk">
+                        <div class="kb-header" onclick="toggleSection(this)">
+                            <span>⌛ Timeline Notes</span>
+                            <span>▼</span>
+                        </div>
+                        <div class="kb-content">
+                            <div class="excerpt-item">
+                                <div class="excerpt-source">2024.13.32</div>
+                                <div class="excerpt-text">NGFS updated scenarios, adding...</div>
+                                <div class="excerpt-source">
+                                    <br>
+                                    <b>Notes</b>: this new scenario introduces...<br>
+                                    <b>Tags</b>: topic:ngfs-scenarios; goal:motivation; ... <br>
+                                    <b>Related Notes</b>: ... 
+                                </div>                            
+                            </div>
+                            <div class="excerpt-item">
+                                <div class="excerpt-source">2023.13.32</div>
+                                <div class="excerpt-text">New research suggests short-term scenarios...</div>
+                                <div class="excerpt-source">
+                                    <br>
+                                    <b>Notes</b>: this paper finds that...<br>
+                                    <b>Tags</b>: topic:ngfs-scenarios; goal:motivation; ... <br>
+                                    <b>Related Notes</b>: ... 
+                                </div>                            
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Methodology Notes Section -->
+                    <!-- <div class="kb-section">
+                        <div class="kb-header" onclick="toggleSection(this)">
+                            <span>🔬 Sensemaking & Research Notes</span>
+                            <span>▼</span>
+                        </div>
+                        <div class="kb-content">
+                            <div style="margin-bottom: 16px;">
+                                <strong>Key Insight:</strong> The NGFS four-step process provides a standardized framework, but implementation varies significantly across central banks depending on objectives, data availability, and institutional capacity.
+                            </div>
+                            <div style="margin-bottom: 16px;">
+                                <strong>Data Challenge:</strong> Limited granular data on firm-level climate exposures remains the biggest obstacle to meaningful stress testing. Need to develop proxy methods and expand supervisory data collection.
+                            </div>
+                            <div style="margin-bottom: 16px;">
+                                <strong>Model Integration:</strong> Major gap exists between climate-economy models (IAMs, CGEs) and traditional macroeconomic models used by central banks. Hybrid approaches showing promise.
+                            </div>
+                            <div style="margin-bottom: 16px;">
+                                <strong>Physical vs Transition:</strong> Most current exercises focus on transition risks due to modeling tractability. Physical risk quantification remains challenging, especially for compound and cascading effects.
+                            </div>
+                            <div style="margin-bottom: 16px;">
+                                <strong>Future Research:</strong> Need to explore feedback loops between financial system responses and real economy impacts, particularly around fire sales and credit crunches during transition.
+                            </div>
+                        </div>
+                    </div> -->
+                </div>
+
+                <!-- Timeline Tab -->
+                <div id="timeline" class="tab-pane">
+                    <div class="timeline">
+                        <div class="timeline-item">
+                            <div class="branch-indicator">foundation</div>
+                            <div class="commit-hash">f8a9b2c</div>
+                            <div class="commit-message">Initial climate risk framework development</div>
+                            <div class="commit-details">
+                                Established basic physical and transition risk taxonomy, initial TCFD alignment<br>
+                                <span class="text-muted small">January 2018 • 4 foundational references • TCFD framework</span>
+                            </div>
+                        </div>
+
+                        <div class="timeline-item">
+                            <div class="branch-indicator">ngfs-scenarios</div>
+                            <div class="commit-hash">d3e4f5g</div>
+                            <div class="commit-message">NGFS scenario framework integration</div>
+                            <div class="commit-details">
+                                Major addition: NGFS Guide (2020), three-scenario framework (Orderly, Disorderly, Hot House World), standardized methodology<br>
+                                <span class="text-muted small">June 2020 • 8 references added • 3 core scenarios</span>
+                            </div>
+                        </div>
+
+                        <div class="timeline-item">
+                            <div class="branch-indicator">empirical-studies</div>
+                            <div class="commit-hash">h6i7j8k</div>
+                            <div class="commit-message">National implementation studies</div>
+                            <div class="commit-details">
+                                Integrated practical applications: DNB stress test, BoE biennial scenario, Banque de France pilot exercise<br>
+                                <span class="text-muted small">2018-2020 • 12 references added • 3 major case studies</span>
+                            </div>
+                        </div>
+
+                        <div class="timeline-item">
+                            <div class="branch-indicator">physical-risk-modeling</div>
+                            <div class="commit-hash">l9m0n1o</div>
+                            <div class="commit-message">Physical risk quantification breakthrough</div>
+                            <div class="commit-details">
+                                Advanced physical risk modeling: improved damage functions, sectoral granularity, extreme event modeling<br>
+                                <span class="text-muted small">2019-2021 • 7 references added • Damage function updates</span>
+                            </div>
+                        </div>
+
+                        <div class="timeline-item">
+                            <div class="branch-indicator">data-integration</div>
+                            <div class="commit-hash">p2q3r4s</div>
+                            <div class="commit-message">Enhanced data frameworks and methodologies</div>
+                            <div class="commit-details">
+                                Integrated granular exposure data, sectoral vulnerability factors, firm-level climate metrics<br>
+                                <span class="text-muted small">2020-2022 • 15 references added • Methodological improvements</span>
+                            </div>
+                        </div>
+
+                        <div class="timeline-item">
+                            <div class="branch-indicator">phase-5-scenarios</div>
+                            <div class="commit-hash">t5u6v7w</div>
+                            <div class="commit-message">NGFS Phase V scenarios and short-term analysis</div>
+                            <div class="commit-details">
+                                Latest update: expanded scenario set, short-term climate scenarios, enhanced regional granularity, nature-related risks<br>
+                                <span class="text-muted small">November 2024 • 20+ references added • 7 scenarios • Short-term focus</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chat Tab -->
+                <div id="chat" class="tab-pane">
+                    <div class="chat-container">
+                        <div class="chat-messages">
+                            <div class="message assistant">
+                                <div class="message-avatar">AI</div>
+                                <div class="message-content">
+                                    Hello! I'm here to help you explore climate stress testing research and NGFS scenarios. I can explain methodologies, compare different approaches, analyze results, or help you understand the evolution of climate risk assessment. What would you like to discuss?
+                                </div>
+                            </div>
+
+                            <div class="message user">
+                                <div class="message-avatar">U</div>
+                                <div class="message-content">
+                                    What are the main differences between the NGFS Orderly, Disorderly, and Hot House World scenarios?
+                                </div>
+                            </div>
+
+                            <div class="message assistant">
+                                <div class="message-avatar">AI</div>
+                                <div class="message-content">
+                                    The three NGFS scenarios explore different climate futures with distinct risk profiles:
+
+                                    <strong>🟢 Orderly Transition:</strong>
+                                    • Immediate climate action starting 2020
+                                    • Gradual carbon price increases (~$10/tonne CO2/year)
+                                    • Temperature rise limited to well-below 2°C
+                                    • <em>Low physical and transition risks</em>
+
+                                    <strong>🟡 Disorderly Transition:</strong> 
+                                    • Delayed action until 2030, then rapid catch-up
+                                    • Sharp carbon price increases (~$35/tonne CO2/year)
+                                    • Net zero by ~2050 (faster than Orderly)
+                                    • <em>High transition risks, medium physical risks</em>
+
+                                    <strong>🔴 Hot House World:</strong>
+                                    • Only current policies implemented
+                                    • Minimal carbon pricing
+                                    • Temperature rise >3°C by 2100
+                                    • <em>Very high physical risks, low transition risks</em>
+
+                                    Your stress test data shows Hot House World has the highest GDP impact (-8.4%) and financial losses (€204bn), highlighting the economic cost of inaction.
+                                </div>
+                            </div>
+
+                            <div class="message user">
+                                <div class="message-avatar">U</div>
+                                <div class="message-content">
+                                    How do central banks typically implement these scenarios in stress tests?
+                                </div>
+                            </div>
+
+                            <div class="message assistant">
+                                <div class="message-avatar">AI</div>
+                                <div class="message-content">
+                                    Central banks follow the NGFS four-step process but adapt it to their specific contexts:
+
+                                    <strong>🎯 Step 1 - Objectives:</strong>
+                                    • <strong>Microprudential:</strong> Assess individual bank resilience
+                                    • <strong>Macroprudential:</strong> Identify systemic risks
+                                    • <strong>Monetary policy:</strong> Understand macroeconomic impacts
+
+                                    <strong>📊 Step 2 - Implementation Approaches:</strong>
+                                    • <strong>Top-down:</strong> Supervisor calculates impacts (e.g., DNB approach)
+                                    • <strong>Bottom-up:</strong> Banks model their own portfolios (e.g., BoE BES)
+                                    • <strong>Hybrid:</strong> Combination of both methods
+
+                                    <strong>⚙️ Key Adaptations by Institution:</strong>
+                                    • <strong>Bank of England:</strong> 30-year horizon, dynamic balance sheets
+                                    • <strong>DNB:</strong> 5-year focus, sectoral vulnerability factors
+                                    • <strong>Banque de France:</strong> Sectoral input-output modeling
+                                    • <strong>ECB:</strong> System-wide exposure analysis
+
+                                    The biggest challenge remains translating high-level scenarios into granular, actionable stress tests with available data.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="chat-input-container">
+                            <textarea class="chat-input" placeholder="Ask about NGFS scenarios, stress testing methods, or climate risk research..." rows="2"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Tab switching functionality
+        function switchTab(tabId) {
+            // Hide all tab panes
+            const panes = document.querySelectorAll('.tab-pane');
+            panes.forEach(pane => pane.classList.remove('active'));
+            
+            // Remove active class from all buttons
+            const buttons = document.querySelectorAll('.tab-button');
+            buttons.forEach(button => button.classList.remove('active'));
+            
+            // Show selected tab pane and activate button
+            document.getElementById(tabId).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // Knowledge base section toggle
+        function toggleSection(header) {
+            const content = header.nextElementSibling;
+            const arrow = header.querySelector('span:last-child');
+            
+            if (content.classList.contains('collapsed')) {
+                content.classList.remove('collapsed');
+                arrow.textContent = '▼';
+            } else {
+                content.classList.add('collapsed');
+                arrow.textContent = '▶';
+            }
+        }
+
+        // Chat input handling
+        document.querySelector('.chat-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                const message = this.value.trim();
+                if (message) {
+                    addChatMessage(message, 'user');
+                    this.value = '';
+                    
+                    // Simulate AI response after a short delay
+                    setTimeout(() => {
+                        addChatMessage('Thank you for your question about climate stress testing. Based on the NGFS framework and research in your knowledge base, I can provide insights from the referenced studies. However, this is a static demo - in a real implementation, I would analyze your specific query against all the scenario data, stress test results, and methodology papers you have collected.', 'assistant');
+                    }, 1000);
+                }
+            }
+        });
+
+        function addChatMessage(content, sender) {
+            const messagesContainer = document.querySelector('.chat-messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}`;
+            
+            messageDiv.innerHTML = `
+                <div class="message-avatar">${sender === 'user' ? 'U' : 'AI'}</div>
+                <div class="message-content">${content}</div>
+            `;
+            
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+    </script>
+</body>
+</html>
